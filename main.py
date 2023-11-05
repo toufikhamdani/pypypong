@@ -3,6 +3,7 @@ import pygame
 WIDTH, HEIGHT = 900, 500
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
+RED = (255, 0, 0)
 FPS = 60
 BALL_VEL = 5
 PONG_VEL = 5
@@ -24,7 +25,7 @@ def draw_game_window(left_pong, right_pong, ball):
     # Dessiner les objets dynamiques
     pygame.draw.rect(WIN, BLACK, left_pong)
     pygame.draw.rect(WIN, BLACK, right_pong)
-    pygame.draw.rect(WIN, BLACK, ball)
+    pygame.draw.rect(WIN, RED, ball)
     # Ne pas oublier de redessiner notre fenêtre
     pygame.display.update()
 
