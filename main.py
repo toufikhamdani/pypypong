@@ -5,7 +5,7 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 FPS = 60
 BALL_VEL = 5
-PONG_VEL = 4
+PONG_VEL = 5
 
 PONG_COLLISION = pygame.USEREVENT + 1
 Y_BORDER_COLLISION = pygame.USEREVENT + 2
@@ -46,7 +46,9 @@ def handle_right_pong(right_pong, keys_pressed):
 def handle_ball(left_pong, right_pong, ball, x_increment, y_increment):
     ball.x += x_increment
     ball.y += y_increment
-    if left_pong.colliderect(ball) or right_pong.colliderect(ball):
+    if (left_pong.colliderect(ball) and ball.x > left_pong.x) or (
+        right_pong.colliderect(ball) and ball.x < right_pong.x
+    ):
         pygame.event.post(pygame.event.Event(PONG_COLLISION))
     elif ball.y == 0 or ball.y + 15 - HEIGHT > 0:
         pygame.event.post(pygame.event.Event(Y_BORDER_COLLISION))
@@ -67,6 +69,7 @@ def main():
 
     clock = pygame.time.Clock()
     run = True
+
     while run:
         clock.tick(FPS)
         for event in pygame.event.get():
@@ -78,7 +81,6 @@ def main():
                 y_increment = -1 * y_increment
             if event.type == LEAVE_FIELD_LEFT:
                 score_right_player += 1
-
             if event.type == LEAVE_FIELD_RIGHT:
                 score_left_player += 1
 
