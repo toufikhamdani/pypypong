@@ -1,4 +1,6 @@
 import pygame
+import random
+
 
 WIDTH, HEIGHT = 900, 500
 WHITE = (255, 255, 255)
@@ -12,6 +14,7 @@ PONG_COLLISION = pygame.USEREVENT + 1
 Y_BORDER_COLLISION = pygame.USEREVENT + 2
 LEAVE_FIELD_LEFT = pygame.USEREVENT + 3
 LEAVE_FIELD_RIGHT = pygame.USEREVENT + 4
+RESTART = pygame.USEREVENT + 5
 
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("PypyPong")
@@ -51,7 +54,7 @@ def handle_ball(left_pong, right_pong, ball, x_increment, y_increment):
         right_pong.colliderect(ball) and ball.x < right_pong.x
     ):
         pygame.event.post(pygame.event.Event(PONG_COLLISION))
-    elif ball.y == 0 or ball.y + 15 - HEIGHT > 0:
+    elif (ball.y <= 5) or (ball.y + 15 - HEIGHT > 0):
         pygame.event.post(pygame.event.Event(Y_BORDER_COLLISION))
     elif ball.x < 0:
         pygame.event.post(pygame.event.Event(LEAVE_FIELD_LEFT))
@@ -59,19 +62,36 @@ def handle_ball(left_pong, right_pong, ball, x_increment, y_increment):
         pygame.event.post(pygame.event.Event(LEAVE_FIELD_RIGHT))
 
 
+def handle_pause(keys_pressed):
+    if keys_pressed[pygame.K_ESCAPE]:
+        pygame.event.post(pygame.event.Event(RESTART))
+
+
+def init_ball():
+    x = random.randrange(100, 850)
+    y = random.randrange(100, 400)
+
+    return pygame.Rect(x, y, 15, 15)
+
+
+def get_increments():
+    return random.choice((-1, 1)) * BALL_VEL, random.choice((-1, 1)) * BALL_VEL
+
+
 def main():
     left_pong = pygame.Rect(30, HEIGHT / 2 - 40, 15, 80)
     right_pong = pygame.Rect(WIDTH - 30, HEIGHT / 2 - 40, 15, 80)
-    ball = pygame.Rect(20, 90, 15, 15)
+    ball = init_ball()
+
     score_right_player = 0
     score_left_player = 0
-    x_increment = BALL_VEL
-    y_increment = BALL_VEL
+    x_increment, y_increment = get_increments()
 
     clock = pygame.time.Clock()
     run = True
 
     while run:
+        unClick = False
         clock.tick(FPS)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -84,6 +104,16 @@ def main():
                 score_right_player += 1
             if event.type == LEAVE_FIELD_RIGHT:
                 score_left_player += 1
+            if event.type == RESTART:
+                if unClick == False:
+                    print("escape registered")
+                    score_right_player = 0
+                    score_left_player = 0
+                    ball = init_ball()
+                    x_increment, y_increment = get_increments()
+                    pygame.event.clear(eventtype=RESTART)
+            if event.type == pygame.KEYUP:
+                unClick == True
 
         keys_pressed = pygame.key.get_pressed()
 
@@ -91,6 +121,7 @@ def main():
         handle_right_pong(right_pong, keys_pressed)
         handle_ball(left_pong, right_pong, ball, x_increment, y_increment)
         draw_game_window(left_pong, right_pong, ball)
+        handle_pause(keys_pressed)
 
     pygame.quit()
 
